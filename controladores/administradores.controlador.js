@@ -1,6 +1,9 @@
 //importar el modelo
 const Administradores = require('../modelos/administradores.modelos');
 
+//modulo para encriptar contraseñas
+const bcrypt = require('bcrypt');
+
 //funcion get 
 
 let mostrarAdministradores = (req,res)=>{
@@ -47,7 +50,7 @@ let crearAdministrador = (req,res)=>{
     let administradores = new Administradores({
         
         usuario: body.usuario,
-        password: body.password,
+        password: bcrypt.hashSync(body.password,10),
         
     })
 
