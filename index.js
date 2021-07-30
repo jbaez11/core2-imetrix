@@ -32,6 +32,7 @@ mongoose.set('useUnifiedTopology', true);
 app.use( require('./rutas/slide.blog.ruta'));
 app.use( require('./rutas/galeria.blog.ruta'));
 app.use( require('./rutas/articulos.blog.ruta'));
+app.use( require('./rutas/administradores.ruta'));
 
 //conexion BD
 mongoose.connect('mongodb://localhost:27017/apirest-imetrix', {
