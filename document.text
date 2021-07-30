@@ -1,0 +1,2 @@
+api-rest: interfaz de aplicaciones para transferir datos 
+api-restful:  api-rest + peticiones http, post,put,delete
