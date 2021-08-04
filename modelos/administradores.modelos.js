@@ -16,5 +16,14 @@ let administradoresSchema = new Schema({
     
 });
 
+//evitar devolver en la data el campo password
+
+administradoresSchema.methods.toJSON = function(){
+    let administrador = this;
+    let adminObject = administrador.toObject();
+    delete adminObject.password;
+
+    return adminObject;
+}
 
 module.exports = mongoose.model("administradores",administradoresSchema)
