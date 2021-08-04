@@ -6,7 +6,7 @@ let verificarToken = (req,res,next) =>{
 
     let token = req.get('Authorization');
 
-    jwt.verify(token,"privateClaveINternas2021", (err,decoded)=>{
+    jwt.verify(token, process.env.SECRET, (err,decoded)=>{
         if(err){
             return res.json({
                 status:401,

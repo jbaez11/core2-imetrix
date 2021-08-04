@@ -298,7 +298,7 @@ let login = (req,res)=>{
         let token = jwt.sign({
             data,
 
-        },"privateClaveINternas2021", {expiresIn: 60*60*24*1})
+        },process.env.SECRET, {expiresIn: process.env.CADUCIDAD})
 
         res.json({
             status:200,
