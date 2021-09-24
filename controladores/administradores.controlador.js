@@ -54,7 +54,7 @@ let crearAdministrador = (req,res)=>{
 
     let administradores = new Administradores({
         
-        usuario: body.usuario,
+        usuario: body.usuario.toLowerCase(),
         password: bcrypt.hashSync(body.password,10),
         
     })
@@ -199,56 +199,98 @@ let editarAdministrador  = (req,res)=>{
 
 //funcion delete
 
-let borrarAdministrador = (req,res)=>{
-    //capturar id Administrador a borrar
+let borrarAdministrador = (req, res)=>{
 
-    let id = req.params.id;
+	//Capturamos el id del administrador a borrar
 
-    // 1. validar existencia del Administrador
+	let id = req.params.id;
 
-    Administradores.findById(id,(err,data) => {
+	/*=============================================
+	0. EVITAR BORRAR ÚNICO ADMINISTRADOR
+	=============================================*/	
 
-        // validar que no se tenga error en la BD
+	Administradores.find({})
+	.exec((err, data)=>{
 
-        if(err){
-            return res.json({
-                status:500,
-                mensaje: "Error en el servidor",
-                err
-            })
-        }
+		//Contar la cantidad de registros
+		Administradores.countDocuments({}, (err, total)=>{
 
-        //validar existencia Administrador
+			if(Number(total) == 1){
 
-        if(!data){
-            return res.json({
-                status:404,
-                mensaje: "El Administrador no existe en la BD",
-                
-            })
+				return res.json({
 
-        }
+					status:400,
+					mensaje: "No se puede eliminar el único administrador que existe"
 
-       
-        //borrar registro en mongo DB
+				})
+			}
 
-        Administradores.findByIdAndRemove(id,(err,data)=>{
-            if(err){
-                return res.json({
-                    status:500,
-                    mensaje: "Error al borrar el Administrador",
-                    err
-                })
-            }
+			/*=============================================
+			1. VALIDAMOS QUE EL ADMINISTRADOR SI EXISTA
+			=============================================*/	
 
-            res.json({
-                status:200,
-                mensaje: "El Administrador ha sido borrado exitosamente"
-            })
-        })
+			//https://mongoosejs.com/docs/api.html#model_Model.findById
 
-    })
+			Administradores.findById(id, ( err, data) =>{
+
+				//Validamos que no ocurra error en el proceso
+
+				if(err){
+
+					return res.json({
+
+						status: 500,
+						mensaje:"Error en el servidor",
+						err
+					
+					})
+				}
+
+				//Validamos que el Administrador exista
+
+				if(!data){
+
+					return res.json({
+
+						status: 400,
+						mensaje:"El administrador no existe en la Base de datos"
+						
+					})	
+
+				}
+
+				// Borramos registro en MongoDB
+				//https://mongoosejs.com/docs/api.html#model_Model.findByIdAndRemove
+
+				Administradores.findByIdAndRemove(id, (err, data) =>{
+
+					if(err){
+
+						return res.json({
+
+							status: 500,
+							mensaje:"Error al borrar el administrador",
+							err
+						
+						})
+					}
+
+					res.json({
+						status:200,
+						mensaje: "El administrador ha sido borrado correctamente"
+
+					})
+				
+				})
+
+			})
+
+		})
+
+	}) 
+
 }
+
 
 //funcion login
 let login = (req,res)=>{
@@ -302,7 +344,8 @@ let login = (req,res)=>{
 
         res.json({
             status:200,
-            token
+            token,
+            data
         })
     })
 }

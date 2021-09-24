@@ -2,6 +2,7 @@ const Galeria = require('../modelos/galeria.blog.modelos');
 
 //administracion de carpetas y archivos
 const fs = require('fs');
+const path = require('path');
 
 //funcion get
 
@@ -375,10 +376,38 @@ let borrarGaleria = (req,res)=>{
 
 }
 
+/*=============================================
+FUNCIÓN GET PARA TENER ACCESO A LAS IMÁGENES
+=============================================*/
+
+let mostrarImg = (req, res)=>{
+
+	let imagen = req.params.imagen;
+	let rutaImagen = `./archivos/blog/galeria/${imagen}`;
+
+	fs.exists(rutaImagen, exists=>{
+
+		if(!exists){
+
+			return res.json({
+				status:400,
+				mensaje: "La imagen no existe"
+			})
+
+		}
+
+		res.sendFile(path.resolve(rutaImagen));
+
+	})
+
+}
+
+
 
 module.exports = {
     mostrarGaleria,
     crearGaleria,
     editarGaleria,
     borrarGaleria,
+    mostrarImg
 }

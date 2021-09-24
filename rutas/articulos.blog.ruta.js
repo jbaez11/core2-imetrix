@@ -12,6 +12,7 @@ app.get('/mostrar-articulos', Articulos.mostrarArticulos);
 app.post('/crear-articulo',  verificarToken, Articulos.crearArticulo);
 app.put('/editar-articulo/:id', verificarToken,  Articulos.editarArticulo);
 app.delete('/borrar-articulo/:id', verificarToken,  Articulos.borrarArticulo);
+app.get('/mostrar-img-articulo/:imagen', Articulos.mostrarImg);
 
 //exportar la ruta
 module.exports = app;

@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload')
+const cors = require('cors');
 
 
 
@@ -20,6 +21,12 @@ app.use(bodyParser.json({limit:'10mb', extended: true }))
 //middleware para fileUpload
 app.use(fileUpload());
 
+/*=============================================
+EJECUTANDO CORS
+=============================================*/
+
+app.use(cors());
+
 
 //mongoose deprecated
 
@@ -31,11 +38,15 @@ mongoose.set('useUnifiedTopology', true);
 //importar rutas
 app.use( require('./rutas/slide.blog.ruta'));
 app.use( require('./rutas/galeria.blog.ruta'));
+app.use( require('./rutas/customer.pag.ruta'));
+app.use( require('./rutas/intro.pag.ruta'));
 app.use( require('./rutas/articulos.blog.ruta'));
 app.use( require('./rutas/administradores.ruta'));
 
+
+
 //conexion BD
-mongoose.connect('mongodb://localhost:27017/apirest-imetrix', {
+mongoose.connect('mongodb+srv://jonathan10:Jq4LfZcGmOTO39ko@cluster0.vff1e.mongodb.net/apirest-imetrix?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,

@@ -1,19 +1,14 @@
-const Articulos = require('../modelos/articulos.blog.modelos');
+const Intro = require('../modelos/intro.pag.modelos');
 
 //administracion de carpetas y archivos
 const fs = require('fs');
-//crear carpetas
-const mkdirp = require('mkdirp');
-//eliminar carpetas
-const rimraf = require('rimraf');
-
 const path = require('path');
 
 //funcion get
 
-let mostrarArticulos = (req,res)=>{
+let mostrarIntro = (req,res)=>{
     
-    Articulos.find({})
+    Intro.find({})
     .exec((err,data)=>{
         if(err){
             return res.json({
@@ -23,7 +18,7 @@ let mostrarArticulos = (req,res)=>{
         }
         //contar cantidad de registros
 
-        Articulos.countDocuments({},(err,total)=>{
+        Intro.countDocuments({},(err,total)=>{
             if(err){
                 return res.json({
                     status:500,
@@ -42,11 +37,13 @@ let mostrarArticulos = (req,res)=>{
     })
 
     
+    
+
 }
 
 //funcion post
 
-let crearArticulo = (req,res)=>{
+let crearIntro = (req,res)=>{
 
     //obtener cuerpo del formulario
 
@@ -76,7 +73,7 @@ let crearArticulo = (req,res)=>{
 
     //validar tamaño del archivo
 
-    if(archivo.size > 5000000){
+    if(archivo.size > 2000000){
         return res.json({
             status:400,
             mensaje:"la imagen debe ser inferior a 2MB",
@@ -91,17 +88,13 @@ let crearArticulo = (req,res)=>{
     //capturar la extension del archivo
 
     let extension = archivo.name.split('.').pop();
-
-    //crear nueva carpeta con el nombre de la url
-
-    let crearCarpeta = mkdirp.sync(`./archivos/blog/articulos/${body.url}`)
     
     //mover archivo a la carpeta
 
-    archivo.mv(`./archivos/blog/articulos/${body.url}/${nombre}.${extension}`, err => {
+    archivo.mv(`./archivos/pagina/intro/${nombre}.${extension}`, err => {
         if(err){
             return res.json({
-                status:400,
+                status:500,
                 mensaje:"Error al guardar la imagen",
                 err
                 
@@ -110,22 +103,20 @@ let crearArticulo = (req,res)=>{
 
         //obtener datos del formulario y pasarlos al modelo
 
-        let articulos = new Articulos({
-            portada : `${nombre}.${extension}`,
+        let intro = new Intro({
+            imagen : `${nombre}.${extension}`,
             titulo: body.titulo,
-            intro: body.intro,
-            url:body.url,
-            contenido: body.contenido
+            descripcion: body.descripcion,
         })
 
         // guardar en mongo db
 
-        articulos.save((err,data)=>{
+        intro.save((err,data)=>{
             if(err){
 
                 return res.json({
                 status:400,
-                mensaje:"Error al almacenar los Articulos",
+                mensaje:"Error al almacenar el Intro",
                 err
                 })
             }
@@ -133,7 +124,7 @@ let crearArticulo = (req,res)=>{
             res.json({
                 status:200,
                 data,
-                mensaje:"El Articulo ha sido creado con exito"
+                mensaje:"El Intro ha sido creado con exito"
             })
         });
 
@@ -147,9 +138,9 @@ let crearArticulo = (req,res)=>{
 
 //funcion put
 
-let editarArticulo = (req,res)=>{
+let editarIntro = (req,res)=>{
 
-    //capturar id Articulos
+    //capturar id Intro
 
     let id = req.params.id;
 
@@ -157,9 +148,9 @@ let editarArticulo = (req,res)=>{
 
     let body = req.body;
 
-    // 1. validar existencia del Articulos
+    // 1. validar existencia del Intro
 
-    Articulos.findById(id,(err,data) => {
+    Intro.findById(id,(err,data) => {
 
         // validar que no se tenga error en la BD
 
@@ -171,21 +162,21 @@ let editarArticulo = (req,res)=>{
             })
         }
 
-        //validar existencia Articulos
+        //validar existencia Intro
 
         if(!data){
             return res.json({
                 status:404,
-                mensaje: "El Articulo no existe en la BD",
+                mensaje: "El Intro no existe en la BD",
                 
             })
 
         }
 
-        let rutaImagen = data.portada
+        let rutaImagen = data.imagen
 
         // 2. validar cambio de IMG
-        let validarCambioArchivo = (req, body, rutaImagen)=>{
+        let validarCambioArchivo = (req,rutaImagen)=>{
 
             return new Promise((resolve,reject)=>{
                 if(req.files){
@@ -226,7 +217,7 @@ let editarArticulo = (req,res)=>{
 
                     //mover el archivo
 
-                    archivo.mv(`./archivos/blog/articulos/${body.url}/${nombre}.${extension}`, err =>{
+                    archivo.mv(`./archivos/pagina/intro/${nombre}.${extension}`, err =>{
                         if(err){
                             
 
@@ -241,8 +232,8 @@ let editarArticulo = (req,res)=>{
 
                         //borrar antigua imagen
 
-                        if(fs.existsSync(`./archivos/blog/articulos/${body.url}/${rutaImagen}`)){
-                            fs.unlinkSync(`./archivos/blog/articulos/${body.url}/${rutaImagen}`)
+                        if(fs.existsSync(`./archivos/pagina/intro/${rutaImagen}`)){
+                            fs.unlinkSync(`./archivos/pagina/intro/${rutaImagen}`)
                         }
 
                         //dar valor a la nueva imagen
@@ -262,18 +253,15 @@ let editarArticulo = (req,res)=>{
         let cambiarRegistrosBD = (id, body, rutaImagen)=>{
             return new Promise((resolve,reject)=>{
 
-                let datosArticulos = {
-                    portada : rutaImagen,
+                let datosIntro = {
+                    imagen : rutaImagen,
                     titulo : body.titulo,
-                    intro : body.intro,
-                    url : body.url,
-                    contenido : body.contenido,
-
+                    descripcion : body.descripcion,
                 }
         
                 //actualizar en mongoDB
         
-                Articulos.findByIdAndUpdate(id,datosArticulos, {new:true,runValidators:true}, (err,data) => {
+                Intro.findByIdAndUpdate(id,datosIntro, {new:true,runValidators:true}, (err,data) => {
                     if(err){
                         let respuesta = {
                             res:res,
@@ -283,7 +271,7 @@ let editarArticulo = (req,res)=>{
                         reject(respuesta);
                         // return res.json({
                         //     status:400,
-                        //     mensaje: "Error al editar Articulos",
+                        //     mensaje: "Error al editar Intro",
                         //     err
                         // }) 
                     }
@@ -303,18 +291,18 @@ let editarArticulo = (req,res)=>{
 
         // sincronizar las promesas
 
-        validarCambioArchivo(req,body,rutaImagen).then(rutaImagen => {
+        validarCambioArchivo(req,rutaImagen).then(rutaImagen => {
             cambiarRegistrosBD(id,body,rutaImagen).then(respuesta =>{
                 respuesta["res"].json({
                     status:200,
                     data: respuesta["data"],
-                    mensaje: "El Articulo ha sido actualizado con exito"
+                    mensaje: "El Intro ha sido actualizado con exito"
                 })
             }).catch(respuesta =>{
                 respuesta["res"].json({
                     status:400,
                     err: respuesta["err"],
-                    mensaje: "Error al editar el Articulo"
+                    mensaje: "Error al editar el Intro"
                 }) 
             })
         }).catch(respuesta => {
@@ -331,14 +319,14 @@ let editarArticulo = (req,res)=>{
 }
 
 //funcion delete
-let borrarArticulo = (req,res)=>{
-    //capturar id Articulos a borrar
+let borrarIntro = (req,res)=>{
+    //capturar id Intro a borrar
 
     let id = req.params.id;
 
-    // 1. validar existencia del Articulo
+    // 1. validar existencia del Intro
 
-    Articulos.findById(id,(err,data) => {
+    Intro.findById(id,(err,data) => {
 
         // validar que no se tenga error en la BD
 
@@ -350,36 +338,37 @@ let borrarArticulo = (req,res)=>{
             })
         }
 
-        //validar existencia Articulos
+        //validar existencia Intro
 
         if(!data){
             return res.json({
                 status:404,
-                mensaje: "El Articulo no existe en la BD",
+                mensaje: "El Intro no existe en la BD",
                 
             })
 
         }
 
-        //borrar la carpeta del articulo
+        //borrar imagen
 
-        let rutaCarpeta = `./archivos/blog/articulos/${data.url}`;
-        rimraf.sync(rutaCarpeta);
+        if(fs.existsSync(`./archivos/pagina/intro/${data.imagen}`)){
+            fs.unlinkSync(`./archivos/pagina/intro/${data.imagen}`)
+        }
 
         //borrar registro en mongo DB
 
-        Articulos.findByIdAndRemove(id,(err,data)=>{
+        Intro.findByIdAndRemove(id,(err,data)=>{
             if(err){
                 return res.json({
                     status:500,
-                    mensaje: "Error al borrar el Articulo",
+                    mensaje: "Error al borrar el Intro",
                     err
                 })
             }
 
             res.json({
                 status:200,
-                mensaje: "El Articulo ha sido borrado exitosamente"
+                mensaje: "El Intro ha sido borrado exitosamente"
             })
         })
 
@@ -388,15 +377,14 @@ let borrarArticulo = (req,res)=>{
 
 
 }
-
 /*=============================================
 FUNCIÓN GET PARA TENER ACCESO A LAS IMÁGENES
 =============================================*/
 
 let mostrarImg = (req, res)=>{
 
-	let imagen = req.params.imagen.split('+');
-	let rutaImagen = `./archivos/blog/articulos/${imagen[0]}/${imagen[1]}`;
+	let imagen = req.params.imagen;
+	let rutaImagen = `./archivos/pagina/intro/${imagen}`;
 
 	fs.exists(rutaImagen, exists=>{
 
@@ -416,10 +404,11 @@ let mostrarImg = (req, res)=>{
 }
 
 
+
 module.exports = {
-    mostrarArticulos,
-    crearArticulo,
-    editarArticulo,
-    borrarArticulo,
+    mostrarIntro,
+    crearIntro,
+    editarIntro,
+    borrarIntro,
     mostrarImg
 }
